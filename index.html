@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Math MCQ Exam - Bangla</title>
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+
+    <style>
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background-color: #f4f7f6;
+            color: #333;
+            line-height: 1.6;
+            padding: 20px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        h1, h2 { text-align: center; color: #2c3e50; }
+        .card {
+            background: #fff;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        #timer-container {
+            text-align: right;
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #e74c3c;
+            margin-bottom: 15px;
+        }
+        .option-label {
+            display: block;
+            margin: 10px 0;
+            cursor: pointer;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            transition: background 0.2s;
+        }
+        .option-label:hover { background: #f1f1f1; }
+        input[type="radio"] { margin-right: 10px; }
+        .btn {
+            display: block;
+            width: 100%;
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 15px;
+            font-size: 1.1rem;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+        .btn:hover { background: #2980b9; }
+        .hidden { display: none; }
+        .correct-ans { color: #27ae60; font-weight: bold; }
+        .wrong-ans { color: #c0392b; font-weight: bold; }
+        .explanation {
+            background: #ecf0f1;
+            padding: 10px;
+            border-left: 4px solid #3498db;
+            margin-top: 10px;
+            border-radius: 0 4px 4px 0;
+        }
+        .graph-img { max-width: 100%; height: auto; margin-top: 10px; border-radius: 5px; }
+    </style>
+</head>
+<body>
+
+    <h1>গণিত বহুনির্বাচনী পরীক্ষা</h1>
+    
+    <div id="exam-section">
+        <div id="timer-container">সময় বাকি: <span id="timer">30:00</span></div>
+        <div id="questions-container"></div>
+        <button class="btn" onclick="submitExam()">পরীক্ষা জমা দিন (Submit)</button>
+    </div>
+
+    <div id="result-section" class="hidden card">
+        <h2>ফলাফল (Results)</h2>
+        <p>মোট প্রশ্ন: <span id="total-q"></span></p>
+        <p>সঠিক উত্তর: <span id="correct-q" class="correct-ans"></span></p>
+        <p>ভুল উত্তর: <span id="wrong-q" class="wrong-ans"></span></p>
+        <p>নেগেটিভ মার্কিং: <span id="negative-m" class="wrong-ans"></span></p>
+        <h3>প্রাপ্ত নম্বর: <span id="final-score"></span></h3>
+        <hr>
+        <div id="review-container"></div>
+    </div>
+
+    <script>
+        // 1. Define your questions here. 
+        // IMPORTANT: Use double backslashes (\\) for LaTeX in JavaScript strings!
+        // Use $...$ for inline math and $$...$$ for block math.
+const quizData = [
+    {
+        "question": "$\\int \\frac{dx}{1+\\sin x}$ এর মান কত?",
+        "options": ["$\\tan x - \\sec x + c$", "$\\tan x + c$", "$\\sin x + \\cos x + c$", "$\\sec^2 x$"],
+        "correctAnswerIndex": 0,
+        "explanation": "",
+        "graphUrl": ""
+    },
+    {
+        "question": "$\\int \\frac{e^{\\sec^{-1}x}}{x\\sqrt{x^2-1}} dx$ এর মান কোনটি?",
+        "options": ["$e^{\\sec^{-1}x} + c$", "$\\frac{1}{\\sqrt{x^2-1}} + c$", "$e^{\\cos^{-1}x} + c$", "$1$"],
+        "correctAnswerIndex": 0,
+        "explanation": "",
+        "graphUrl": ""
+    },
+    {
+        "question": "$\\int \\frac{dx}{x \\ln x [\\ln(\\ln x)]}$ এর মান কত?",
+        "options": ["$\\ln(\\ln(\\ln x)) + c$", "$\\ln x + c$", "$e^x + c$", "$1+e^x$"],
+        "correctAnswerIndex": 0,
+        "explanation": "",
+        "graphUrl": ""
+    },
+    {
+        "question": "$\\int \\cot^n x dx$ এর লঘুকরণ সূত্র?",
+        "options": ["$-\\frac{\\tan^{n-2}x}{n-2} - \\int \\tan^{n-2} dx + c$", "$\\frac{\\cot^{n+1}x}{n+1} + c$", "$\\frac{\\cot^{n-1}x}{n-1} - \\int \\cot^{n-2} x dx + c$", "$\\sec^2 x + c$"],
+        "correctAnswerIndex": 2,
+        "explanation": "",
+        "graphUrl": ""
+    },
+    {
+        "question": "$\\int \\tan^3 x dx$ এর মান কোনটি?",
+        "options": ["$\\sec^2 x + c$", "$\\frac{\\tan^2 x}{2} - \\ln(\\sec x) + c$", "$\\frac{\\tan^4 x}{4} + c$", "None"],
+        "correctAnswerIndex": 1,
+        "explanation": "",
+        "graphUrl": ""
+    },
+    {
+        "question": "$\\int_{0}^{\\frac{\\pi}{2}} \\sin^5 \\theta \\cos^4 \\theta d\\theta = ?$",
+        "options": ["$\\frac{9}{8}$", "$\\frac{8}{105}$", "$\\frac{315}{8}$", "$\\frac{8}{315}$"],
+        "correctAnswerIndex": 3,
+        "explanation": "",
+        "graphUrl": ""
+    },
+    {
+        "question": "$\\int_{0}^{1} x^3 (1-x)^4 dx = ?$",
+        "options": ["$\\frac{35}{105}$", "$\\frac{1}{280}$", "$\\frac{16}{35}$", "$\\frac{18}{19}$"],
+        "correctAnswerIndex": 1,
+        "explanation": "",
+        "graphUrl": ""
+    },
+    {
+        "question": "$\\Gamma(-\\frac{1}{2})$ এর মান কোনটি?",
+        "options": ["$2$", "$-2\\sqrt{\\pi}$", "$\\sqrt{\\pi}$", "$1+\\sqrt{\\pi}$"],
+        "correctAnswerIndex": 1,
+        "explanation": "",
+        "graphUrl": ""
+    },
+    {
+        "question": "$\\beta(3, 2) = ?$",
+        "options": ["$\\frac{1}{2}$", "$\\frac{3}{2}$", "$\\frac{2}{5}$", "$\\frac{1}{12}$"],
+        "correctAnswerIndex": 3,
+        "explanation": "",
+        "graphUrl": ""
+    },
+    {
+        "question": "$\\int_{0}^{\\frac{\\pi}{2}} \\cos^7 x dx$ এর মান কত?",
+        "options": ["$\\frac{35\\pi}{128}$", "$\\frac{256}{315}$", "$\\frac{16}{35}$", "$\\frac{5\\pi}{32}$"],
+        "correctAnswerIndex": 2,
+        "explanation": "",
+        "graphUrl": ""
+    },
+    {
+        "question": "$\\int_{0}^{\\pi} \\sin^8 x dx$ এর মান কত?",
+        "options": ["$1$", "$\\frac{16}{15}$", "$\\frac{5\\pi}{32}$", "$\\frac{35\\pi}{128}$"],
+        "correctAnswerIndex": 3,
+        "explanation": "",
+        "graphUrl": ""
+    },
+    {
+        "question": "$\\int_{0}^{1} \\frac{\\tan^{-1} x}{1+x^2} dx$ এর মান নিচের কোনটি?",
+        "options": ["$\\frac{\\pi}{4}$", "$\\frac{\\pi^2}{32}$", "$2\\pi$", "$0$"],
+        "correctAnswerIndex": 1,
+        "explanation": "",
+        "graphUrl": ""
+    },
+    {
+        "question": "$\\int_{0}^{\\pi/4} \\cos^2 \\theta d\\theta$ এর মান কত?",
+        "options": ["$0$", "$\\pi$", "$\\frac{\\pi}{2}$", "$\\frac{1}{8}(\\pi+2)$"],
+        "correctAnswerIndex": 3,
+        "explanation": "",
+        "graphUrl": ""
+    },
+    {
+        "question": "$m=n$ হলে, $\\int_{-\\pi}^{\\pi} \\sin mx \\cdot \\sin nx dx = ?$",
+        "options": ["$0$", "$1$", "$\\pi$", "$\\frac{\\pi}{2}$"],
+        "correctAnswerIndex": 2,
+        "explanation": "",
+        "graphUrl": ""
+    },
+    {
+        "question": "$\\int_{0}^{1} x^3 \\sqrt{1+3x^4} dx$ এর মান কত?",
+        "options": ["$\\frac{18}{15}$", "$\\frac{7}{18}$", "$2$", "$9$"],
+        "correctAnswerIndex": 1,
+        "explanation": "",
+        "graphUrl": ""
+    },
+    {
+        "question": "$\\int_{0}^{\\pi/2} e^x (\\sin x + \\cos x) dx = ?$",
+        "options": ["$\\frac{\\pi}{2}$", "$e$", "$e^{\\pi/2}$", "$0$"],
+        "correctAnswerIndex": 2,
+        "explanation": "",
+        "graphUrl": ""
+    },
+    {
+        "question": "$\\int_{0}^{\\pi/2} \\frac{\\sqrt{\\sin x}}{\\sqrt{\\sin x} + \\sqrt{\\cos x}} dx$ এর মান কত?",
+        "options": ["$\\pi$", "$\\frac{\\pi}{2}$", "$1$", "$\\frac{\\pi}{4}$"],
+        "correctAnswerIndex": 3,
+        "explanation": "",
+        "graphUrl": ""
+    },
+    {
+        "question": "$\\int_{0}^{\\pi/2} \\ln(\\tan x) dx$ এর মান নিচের কোনটি?",
+        "options": ["$0$", "$1$", "$\\frac{\\pi}{2}$", "$\\frac{3\\pi}{2}$"],
+        "correctAnswerIndex": 0,
+        "explanation": "",
+        "graphUrl": ""
+    },
+    {
+        "question": "$y=x^2, x=1, x=3$ দ্বারা আবদ্ধ অংশের ক্ষেত্রফল কত?",
+        "options": ["$\\frac{8}{3}$ বর্গ একক", "$\\frac{35}{3}$ বর্গ একক", "$\\frac{26}{3}$ বর্গ একক", "$\\frac{25}{3}$ বর্গ একক"],
+        "correctAnswerIndex": 2,
+        "explanation": "",
+        "graphUrl": ""
+    },
+    {
+        "question": "$y=e^{-x}, x\\text{-অক্ষ এবং } x=1$ দ্বারা আবদ্ধ ক্ষেত্রের ক্ষেত্রফল-",
+        "options": ["$e$", "$1$", "$\\frac{e-1}{e}$", "$e^2$"],
+        "correctAnswerIndex": 2,
+        "explanation": "",
+        "graphUrl": ""
+    },
+    {
+        "question": "$x\\text{-অক্ষ এবং } y=\\sin x$ বক্ররেখা একটি চাপ দ্বারা আবদ্ধ ক্ষেত্রের ক্ষেত্রফল?",
+        "options": ["$1$", "$2$", "$4$", "$3$"],
+        "correctAnswerIndex": 1,
+        "explanation": "",
+        "graphUrl": ""
+    },
+    {
+        "question": "$xy-4=0$ অধিবৃত্ত, $x\\text{-অক্ষ, } x=1$ এবং $x=e$ রেখা দুটি দ্বারা সীমাবদ্ধ ক্ষেত্রের ক্ষেত্রফল কত বর্গ একক?",
+        "options": ["$1$", "$3$", "$2$", "$4$"],
+        "correctAnswerIndex": 3,
+        "explanation": "",
+        "graphUrl": ""
+    },
+    {
+        "question": "$y^2=x$ এবং $y=x^2$ বক্ররেখা দ্বারা আবদ্ধ এলাকার ক্ষেত্রফল-",
+        "options": ["$\\frac{1}{4}$", "$\\frac{1}{3}$", "$\\frac{1}{2}$", "$\\frac{1}{6}$"],
+        "correctAnswerIndex": 1,
+        "explanation": "",
+        "graphUrl": ""
+    },
+    {
+        "question": "$y^2 = 8x$ এবং এর অভিলম্ব দ্বারা বেষ্টিত ক্ষেত্রের ক্ষেত্রফল কত বর্গ একক-",
+        "options": ["$\\frac{3}{2}$", "$\\frac{32}{3}$", "$\\frac{2}{3}$", "$8$"],
+        "correctAnswerIndex": 1,
+        "explanation": "",
+        "graphUrl": ""
+    },
+    {
+        "question": "$y=x+6$ এবং $y=x^2$ দ্বারা আবদ্ধ অংশের ক্ষেত্রফল?",
+        "options": ["$\\frac{3}{7}$", "$\\frac{39}{4}$", "$\\frac{101}{5}$", "$\\frac{125}{6}$"],
+        "correctAnswerIndex": 3,
+        "explanation": "",
+        "graphUrl": ""
+    },
+    {
+        "question": "$r = a\\cos4\\theta$ এর কয়টি ফাঁস আছে?",
+        "options": ["$4$ টি", "$8$ টি", "$2$টি", "$12$টি"],
+        "correctAnswerIndex": 1,
+        "explanation": "",
+        "graphUrl": ""
+    },
+    {
+        "question": "$r^2 = a^2\\sin2\\theta$ এর ২টি লুপের ক্ষেত্রফল কত?",
+        "options": ["$\\frac{\\pi a^2}{2}$", "$\\pi a^2$", "$a^2$", "$\\frac{a^2}{2}$"],
+        "correctAnswerIndex": 2,
+        "explanation": "",
+        "graphUrl": ""
+    },
+    {
+        "question": "$r^2 = a^2\\cos2\\theta$ এর ১টি ফাঁসের ক্ষেত্রফল-",
+        "options": ["$\\frac{\\pi a^2}{2}$", "$\\frac{a^2}{3}$", "$\\frac{a^2}{2}$", "$a^2$"],
+        "correctAnswerIndex": 2,
+        "explanation": "",
+        "graphUrl": ""
+    },
+    {
+        "question": "$r = a(1-\\cos\\theta)$ এর চিত্র নিচের কোনটি?",
+        "options": [
+            "\\tikz[baseline=-0.5ex, scale=0.3]{ \\draw (-2.5,0) -- (1,0); \\draw (0,-1.5) -- (0,1.5); \\draw[domain=0:360, samples=100] plot ( { (1-cos(\\x))*cos(\\x) }, { (1-cos(\\x))*sin(\\x) } ); }",
+            "\\tikz[baseline=-0.5ex, scale=0.3]{ \\draw (-1,0) -- (2.5,0); \\draw (0,-1.5) -- (0,1.5); \\draw[domain=0:360, samples=100] plot ( { (1+cos(\\x))*cos(\\x) }, { (1+cos(\\x))*sin(\\x) } ); }",
+            "\\tikz[baseline=-0.5ex, scale=0.3]{ \\draw (-1.5,0) -- (1.5,0); \\draw (0,-1) -- (0,2.5); \\draw[domain=0:360, samples=100] plot ( { (1+sin(\\x))*cos(\\x) }, { (1+sin(\\x))*sin(\\x) } ); }",
+            "\\tikz[baseline=-0.5ex, scale=0.3]{ \\draw (-1.5,0) -- (1.5,0); \\draw (0,-2.5) -- (0,1); \\draw[domain=0:360, samples=100] plot ( { (1-sin(\\x))*cos(\\x) }, { (1-sin(\\x))*sin(\\x) } ); }"
+        ],
+        "correctAnswerIndex": 0,
+        "explanation": "",
+        "graphUrl": ""
+    },
+    {
+        "question": "$r = a\\cos\\theta$ এর চিত্র",
+        "options": [
+            "\\tikz[baseline=-0.5ex, scale=0.4]{ \\draw (-2.5,0) -- (1,0); \\draw (0,-1.5) -- (0,1.5); \\draw (-1,0) circle (1); }",
+            "\\tikz[baseline=-0.5ex, scale=0.4]{ \\draw (-1,0) -- (2.5,0); \\draw (0,-1.5) -- (0,1.5); \\draw (1,0) circle (1); }",
+            "\\tikz[baseline=-0.5ex, scale=0.4]{ \\draw (-1.5,0) -- (1.5,0); \\draw (0,-1.5) -- (0,1.5); \\draw (0,0) circle (1); }",
+            "\\tikz[baseline=-0.5ex, scale=0.4]{ \\draw (-1.5,0) -- (1.5,0); \\draw (0,-1) -- (0,2.5); \\draw (0,1) circle (1); }"
+        ],
+        "correctAnswerIndex": 1,
+        "explanation": "",
+        "graphUrl": ""
+    }
+];
+        
+
+        const marksPerCorrect = 1;
+        const penaltyPerWrong = 0.25; // 0.25 negative marking
+        let timeRemaining = 30 * 60; // 30 minutes in seconds
+        let timerInterval;
+
+        // 2. Render Questions
+        function loadQuestions() {
+            const container = document.getElementById('questions-container');
+            let html = '';
+
+            quizData.forEach((q, index) => {
+                html += `<div class="card" id="q-block-${index}">
+                    <h3>প্রশ্ন ${index + 1}: ${q.question}</h3>`;
+                
+                // If there's a graph, render the image
+                if (q.graphUrl) {
+                    html += `<img src="${q.graphUrl}" alt="Graph for Question ${index + 1}" class="graph-img">`;
+                }
+
+                q.options.forEach((opt, optIndex) => {
+                    html += `<label class="option-label">
+                        <input type="radio" name="q${index}" value="${optIndex}">
+                        ${opt}
+                    </label>`;
+                });
+                html += `</div>`;
+            });
+
+            container.innerHTML = html;
+            renderMath(); // Call KaTeX to render the math
+        }
+
+        // 3. Render Math using KaTeX
+        function renderMath() {
+            renderMathInElement(document.body, {
+                delimiters: [
+                    {left: '$$', right: '$$', display: true},
+                    {left: '$', right: '$', display: false}
+                ],
+                throwOnError: false
+            });
+        }
+
+        // 4. Timer Logic
+        function startTimer() {
+            timerInterval = setInterval(() => {
+                timeRemaining--;
+                let minutes = Math.floor(timeRemaining / 60);
+                let seconds = timeRemaining % 60;
+                document.getElementById('timer').innerText = 
+                    `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+                
+                if (timeRemaining <= 0) {
+                    clearInterval(timerInterval);
+                    submitExam(); // Auto submit when time is up
+                }
+            }, 1000);
+        }
+
+        // 5. Submit and Calculate Logic
+        function submitExam() {
+            clearInterval(timerInterval);
+            document.getElementById('exam-section').classList.add('hidden');
+            document.getElementById('result-section').classList.remove('hidden');
+
+            let correctCount = 0;
+            let wrongCount = 0;
+            let unattemptedCount = 0;
+            let reviewHtml = '';
+
+            quizData.forEach((q, index) => {
+                const selected = document.querySelector(`input[name="q${index}"]:checked`);
+                let isCorrect = false;
+
+                reviewHtml += `<div class="card">
+                    <h4>প্রশ্ন ${index + 1}: ${q.question}</h4>`;
+
+                if (selected) {
+                    const selectedVal = parseInt(selected.value);
+                    if (selectedVal === q.correctAnswerIndex) {
+                        correctCount++;
+                        isCorrect = true;
+                        reviewHtml += `<p class="correct-ans">আপনার উত্তর সঠিক: ${q.options[selectedVal]}</p>`;
+                    } else {
+                        wrongCount++;
+                        reviewHtml += `<p class="wrong-ans">আপনার উত্তর ভুল: ${q.options[selectedVal]}</p>
+                                       <p class="correct-ans">সঠিক উত্তর: ${q.options[q.correctAnswerIndex]}</p>`;
+                    }
+                } else {
+                    unattemptedCount++;
+                    reviewHtml += `<p style="color: #f39c12; font-weight:bold;">উত্তর দেওয়া হয়নি।</p>
+                                   <p class="correct-ans">সঠিক উত্তর: ${q.options[q.correctAnswerIndex]}</p>`;
+                }
+
+                // Add explanation
+                if (q.explanation) {
+                    reviewHtml += `<div class="explanation"><strong>ব্যাখ্যা:</strong> ${q.explanation}</div>`;
+                }
+                reviewHtml += `</div>`;
+            });
+
+            // Calculate Scores
+            const totalScore = (correctCount * marksPerCorrect) - (wrongCount * penaltyPerWrong);
+
+            // Display Scores
+            document.getElementById('total-q').innerText = quizData.length;
+            document.getElementById('correct-q').innerText = correctCount;
+            document.getElementById('wrong-q').innerText = wrongCount;
+            document.getElementById('negative-m').innerText = (wrongCount * penaltyPerWrong).toFixed(2);
+            document.getElementById('final-score').innerText = totalScore.toFixed(2) + " / " + (quizData.length * marksPerCorrect);
+            
+            document.getElementById('review-container').innerHTML = reviewHtml;
+            renderMath(); // Render math in the review section
+        }
+
+        // Initialize on load
+        window.onload = () => {
+            loadQuestions();
+            startTimer();
+        };
+    </script>
+</body>
+  </html>
+
+  
